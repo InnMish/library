@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Library</title>
+
+    <style>
+        th, td {
+            padding: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+<th:block th:include="/menu">hi</th:block>
+
+<h2>Books</h2>
+
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Presence</th>
+    </tr>
+
+    <tr th:each="book : ${books}">
+        <td th:utext="${book.getTitle()}">..</td>&lt;!&ndash;
+        <td th:utext="${book.getAuthor()}">..</td>
+        <td th:utext="${book.isPresence()}">..</td>&ndash;&gt;
+    </tr>
+
+</table>
+</body>
+</html>
