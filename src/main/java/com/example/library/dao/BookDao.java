@@ -6,15 +6,17 @@ import java.util.List;
 
 public interface BookDao {
 
-    public List<Book> findAll();
+    public List<Book> findAll(int limit, int offset);
 
-    public int addBook(Book book);
+    public Integer length();
 
-    public void updateBook(Book book);
+    public void addOrEditBook(Book book);
 
-    public void deleteBookById(Book book);
+    public void deleteBookById(int id);
 
-    public void takeBook(Book book);
+    public void takeBook(int id);
 
-    public void returnBook(Book book);
+    public void returnBook(int id);
+
+    public Book getBook(int id);
 }

@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Add a new book</title>
+
 </head>
 
 <body>
@@ -9,24 +10,14 @@
 
 <h2>Add a new book</h2>
 
-<!--<div th:if="${errorMessage!=null}"
-     style="color:red;font-style:italic" th:utext="${errorMessage}">..</div>-->
-
 <div align="center">
-    <form action="save" method="post" modelAttribute="book">
-        <table>
-            <tr>
-                <td>Title</td>
-                <td><input path="title" /></td>
-            </tr>
-            <tr>
-                <td>Author</td>
-                <td><input path="author" /></td>
-            </tr>
-            <tr>
-                <td colspan="2" align="center"><input type="submit" value="Save"></td>
-            </tr>
-        </table>
+    <form action="save" method="post">
+        <input hidden id="id" th:value="${changed?.getId()}">
+        Title:
+        <input name="title" th:value="${changed?.getTitle()}"/><br>
+        Author:
+        <input name="author" th:value="${changed?.getAuthor()}"/><br>
+        <button type="submit">Save</button>
     </form>
 </div>
 

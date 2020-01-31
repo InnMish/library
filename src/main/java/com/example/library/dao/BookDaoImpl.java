@@ -22,8 +22,11 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
-    public List<Book> findAll() {
-        return namedParameterJdbcTemplate.query("select * from book", (resultSet, i) -> {
+    public List<Book> findAll(int limit, int offset) {
+        Map<String, Integer> params = new HashMap<>();
+        params.put("limit", limit);
+        params.put("offset", offset);
+        return namedParameterJdbcTemplate.query("select * from book limit :limit offset :offset", params, (resultSet, i) -> {
             int id = resultSet.getInt("id");
             String title = resultSet.getString("title");
             String author = resultSet.getString("author");
@@ -33,62 +36,75 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
+    public Integer length() {
+        return namedParameterJdbcTemplate.queryForObject("select count(*) from book", new HashMap<>(), Integer.class);
+    }
+
+    @Override
     @Transactional
-    public int addBook(Book book) {
+    public void addOrEditBook(Book book) {
         Map<String, Object> params = new HashMap<>();
+        params.put("id", book.getId());
         params.put("title", book.getTitle());
         params.put("author", book.getAuthor());
         params.put("presence", book.isPresence());
-        return namedParameterJdbcTemplate
-                .update("insert into book (title, author, presence) values (:title, :author, :presence)", params);
-    }
-
-    @Override
-    public void updateBook(Book book) {
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("title", book.getTitle())
-                .addValue("author", book.getAuthor())
-                .addValue("presence", book.isPresence())
-                .addValue("id", book.getId());
-        int status = namedParameterJdbcTemplate
-                .update("update book set title=:title, author = :author, presence = :presence where id = :id", params);
-        if (status != 0) {
-            System.out.println("Book data updated for ID " + book.getId());
+        if (book.getId() > 0) {
+            namedParameterJdbcTemplate
+                    .update("update book set title = :title, author = :author, presence = true where id = :id", params);
         } else {
-            System.out.println("No Book found with ID " + book.getId());
+            namedParameterJdbcTemplate
+                    .update("insert into book (title, author, presence) values (:title, :author, true)", params);
         }
     }
 
     @Override
-    public void deleteBookById(Book book) {
-        SqlParameterSource params = new MapSqlParameterSource("id", book.getId());
+    public void deleteBookById(int id) {
+        SqlParameterSource params = new MapSqlParameterSource("id", id);
         int status = namedParameterJdbcTemplate.update("delete from book where id = :id", params);
         if (status != 0) {
-            System.out.println("Book data deleted for ID " + book.getId());
+            System.out.println("Book data deleted for ID " + id);
         } else {
-            System.out.println("No Book found with ID " + book.getId());
+            System.out.println("No Book found with ID " + id);
         }
     }
 
     @Override
-    public void takeBook(Book book) {
-        SqlParameterSource params = new MapSqlParameterSource("id", book.getId());
-        if (book.isPresence()) {
+    public void takeBook(int id) {
+        Book book = getBook(id);
+        SqlParameterSource params = new MapSqlParameterSource("id", id);
+        if (book != null && book.isPresence()) {
             namedParameterJdbcTemplate.update("update book set presence = false where id = :id", params);
-            System.out.println("Book " + book.getId() + " was taken");
+            System.out.println("Book " + id + " was taken");
         } else {
             System.out.println("No book found");
         }
     }
 
     @Override
-    public void returnBook(Book book) {
-        SqlParameterSource params = new MapSqlParameterSource("id", book.getId());
-        if (!book.isPresence()) {
+    public void returnBook(int id) {
+        Book book = getBook(id);
+        SqlParameterSource params = new MapSqlParameterSource("id", id);
+        if (book != null && !book.isPresence()) {
             namedParameterJdbcTemplate.update("update book set presence = true where id = :id", params);
-            System.out.println("Book " + book.getId() + " was taken");
+            System.out.println("Book " + id + " was taken");
         } else {
             System.out.println("Book is already here");
         }
+    }
+
+    @Override
+    public Book getBook(int id) {
+        return namedParameterJdbcTemplate.query("select * from book where id=" + id, resultSet -> {
+            if (resultSet.next()) {
+                Book book = new Book();
+                book.setId(resultSet.getInt("id"));
+                book.setTitle(resultSet.getString("title"));
+                book.setAuthor(resultSet.getString("author"));
+                book.setPresence(resultSet.getBoolean("presence"));
+                return book;
+            }
+
+            return null;
+        });
     }
 }

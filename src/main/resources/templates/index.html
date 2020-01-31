@@ -1,5 +1,9 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" href="https://pagination.js.org/dist/2.0.7/pagination.css">
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://pagination.js.org/dist/2.1.5/pagination.js"></script>
+
 <head>
     <title>Library</title>
 
@@ -13,22 +17,69 @@
 
 <body>
 <th:block th:include="/menu">hi</th:block>
-
-<h2>Books</h2>
+<header>
+    <h1>Books</h1>
+</header>
 
 <table border="1">
     <tr>
         <th>Title</th>
         <th>Author</th>
         <th>Presence</th>
+        <th>Actions</th>
     </tr>
 
-    <tr th:each="book : ${books}">
-        <td th:utext="${book.getTitle()}">..</td>&lt;!&ndash;
+<!-- <tr th:each="book : ${books}">
+        <td th:utext="${book.getTitle()}">..</td>
         <td th:utext="${book.getAuthor()}">..</td>
-        <td th:utext="${book.isPresence()}">..</td>&ndash;&gt;
-    </tr>
+        <td th:utext="${book.isPresence()}">..</td>
+        <td>
+            <a th:href="@{/delete(id=${book.id})}">Delete</a>
+            <a th:href="@{/edit(id=${book.id})}">Edit</a>
+            <a th:href="@{/take(id=${book.id})}">Take</a>
+            <a th:href="@{/return(id=${book.id})}">Return</a>
+        </td>
+    </tr>-->
 
 </table>
+
+<div id="example"></div>
+
+<script>
+    $(document).ready(function () {
+        $('#example').pagination({
+            dataSource: 'list',
+            locator: 'books',
+            pageSize: '2',
+            totalNumberLocator: function (response) {
+                return response.count;
+            },
+            alias: {
+                pageNumber: 'pageNumber',
+                pageSize: 'limit'
+            }
+            /*ajax:function(options, refresh, $target){
+                console.log(options);
+                $.ajax({
+                    url:'list',
+                    data:{
+                        offset: options.current*options.length,
+                        limit: options.length
+                    },
+                    dataType:'json'
+                }).done(function(res){
+
+                    console.log(res.data);
+                    refresh({
+                        total: res.total,// optional
+                        length: res.length// optional
+                    });
+                }).fail(function(error){
+                });
+            }*/
+        });
+    })
+</script>
+
 </body>
 </html>
